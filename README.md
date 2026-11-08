@@ -2,14 +2,14 @@
 
 A clean, **LLM-powered Telegram chat bot** in Python. The conversation logic
 (the *brain*) is separate from the Telegram transport, so the logic is
-unit-tested offline and the model provider (OpenAI, Anthropic, or an offline
-mock) is swappable without touching the bot.
+unit-tested offline and the model provider is swappable without touching the bot.
 
 ## Features
 
 - 💬 Replies to any message using an LLM, with short per-user memory
 - 🧩 Commands: `/start`, `/help`, `/reset`
-- 🔌 Swappable provider: `mock` (offline, no key), `openai`, or `anthropic`
+- 🔌 Swappable provider: **mock** (offline, no key), **Groq**, **Ollama**,
+  **OpenAI**, or **Anthropic** — all behind one tiny interface
 - 🧪 Brain unit-tested with **no network and no API key** (7 passing tests)
 - 🔒 Secrets stay in `.env` — never in the code
 
@@ -17,7 +17,7 @@ mock) is swappable without touching the bot.
 
 ```
  Telegram  ──►  bot.py  ──►  ChatBrain (brain.py)  ──►  LLMProvider (llm.py)
- (transport)   handlers      history + prompt           mock / openai / anthropic
+ (transport)   handlers      history + prompt           mock / groq / ollama / openai / anthropic
 ```
 
 `bot.py` is the only file that knows about Telegram. Everything worth testing
@@ -26,41 +26,37 @@ what makes the project easy to test and extend.
 
 ## Setup
 
-**1. Create a bot and get a token** — in Telegram, message **@BotFather**, send
-`/newbot`, follow the prompts, and copy the token it gives you.
+**1. Create a bot** — message **@BotFather** on Telegram, send `/newbot`, and
+copy the token.
 
 **2. Install**
 
 ```bash
-git clone https://github.com/aymanghmari/ai-telegram-bot.git
-cd ai-telegram-bot
-pip install -e .            # installs python-telegram-bot
+pip install -e .            # core: python-telegram-bot
+pip install -e ".[openai]"  # needed for Groq / Ollama / OpenAI (OpenAI-compatible)
 ```
 
-**3. Configure**
+**3. Configure** — copy `.env.example` to `.env`, paste your bot token, and pick
+a provider:
 
-```bash
-cp .env.example .env        # Windows: copy .env.example .env
-# edit .env and paste your token into TELEGRAM_BOT_TOKEN
 ```
+TELEGRAM_BOT_TOKEN=...from BotFather...
+AI_PROVIDER=groq
+GROQ_API_KEY=...from console.groq.com...
+AI_MODEL=openai/gpt-oss-20b
+```
+
+- **Groq** (free, fast): some `llama-*` models are enterprise-gated; a free key
+  can use `openai/gpt-oss-20b`, `openai/gpt-oss-120b`, or `qwen/qwen3.8-27b`.
+  Run `python list_models.py` to see which models your key can access.
+- **Ollama** (free, local): set `AI_PROVIDER=ollama` and `AI_MODEL=llama3.2`
+  with Ollama running locally.
+- **mock** (default): offline echo, no key — for testing the plumbing.
 
 **4. Run**
 
 ```bash
 python -m aibot
-```
-
-Open Telegram, find your bot, and say hi. With `AI_PROVIDER=mock` (the default)
-it echoes your message so you can confirm the plumbing works before adding a
-real model.
-
-### Using a real model
-
-Set these in `.env`, then `pip install -e ".[openai]"` (or `".[anthropic]"`):
-
-```
-AI_PROVIDER=openai
-OPENAI_API_KEY=sk-...
 ```
 
 ## Tests
