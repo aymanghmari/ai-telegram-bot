@@ -1,0 +1,25 @@
+[project]
+name = "ai-telegram-bot"
+version = "0.1.0"
+description = "A clean, LLM-powered Telegram chat bot in Python — testable brain, swappable model provider."
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+authors = [{ name = "Ayman Ghmari" }]
+keywords = ["telegram", "bot", "ai", "llm", "chatbot", "openai", "anthropic"]
+dependencies = ["python-telegram-bot>=20,<22"]
+
+[project.optional-dependencies]
+openai = ["openai>=1.0"]
+anthropic = ["anthropic>=0.39"]
+dev = ["pytest>=7.0"]
+
+[project.scripts]
+aibot = "aibot.bot:main"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["aibot"]
